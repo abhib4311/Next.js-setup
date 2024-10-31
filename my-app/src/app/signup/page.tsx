@@ -6,7 +6,7 @@ import axios from "axios";
 
 export default function Page() {
     const router = useRouter();
-    const [user, setUser] = useState({ name: "", email: "", password: "" });
+    const [user, setUser] = useState({ name: "", email: "", password: "", isadmin: false });
     const [loading, setLoading] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(true);
 
@@ -16,6 +16,7 @@ export default function Page() {
 
         try {
             setLoading(true);
+            console.log(user);
             const response = await axios.post('/api/user/signup', user);
             console.log(response);
             router.push('/login');
@@ -36,6 +37,30 @@ export default function Page() {
             </p>
             <div className="w-full max-w-md p-6 bg-gray-900 rounded-lg shadow-lg">
                 <form className="flex flex-col space-y-4" onSubmit={signup}>
+                    <div className="flex-row items-center space-x-2">
+                        <label htmlFor="normal" className="text-gray-200 font-medium">
+                            Normal
+                        </label>
+                        <input
+                            type="radio"
+                            id="normal"
+                            name="isadmin"
+                            value="false"
+                            checked={!user.isadmin}
+                            onChange={(e) => setUser({ ...user, isadmin: e.target.value === "false" })}
+                        />
+                        <label htmlFor="admin" className="text-gray-200 font-medium">
+                            Admin
+                        </label>
+                        <input
+                            type="radio"
+                            id="admin"
+                            name="isadmin"
+                            value="true"
+                            checked={user.isadmin}
+                            onChange={(e) => setUser({ ...user, isadmin: e.target.value === "true" })}
+                        />
+                    </div>
                     <label htmlFor="name" className="text-gray-200 font-medium">
                         Name
                     </label>
