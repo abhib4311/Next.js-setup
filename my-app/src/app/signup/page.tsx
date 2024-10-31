@@ -1,39 +1,41 @@
-"use client"
-import React, { useEffect } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function Page() {
     const router = useRouter();
-    const [user, setUser] = React.useState({
-        name: "",
-        email: "",
-        password: "",
-    });
-    const [loading, setloading] = React.useState(false);
-    const [buttonDisabled, setButtonDisabled] = React.useState(false);
+    const [user, setUser] = useState({ name: "", email: "", password: "" });
+    const [loading, setLoading] = useState(false);
+    const [buttonDisabled, setButtonDisabled] = useState(true);
+
     const signup = async () => {
+        // event.preventDefault();  // Prevent form submission
+        // if (buttonDisabled) return; // Prevent button action if disabled
+
         try {
-            setloading(true);
-
+            setLoading(true);
+            const response = await axios.post('/api/user/signup', user);
+            console.log(response);
+            router.push('/login');
         } catch (error) {
-
-        } finally { }
+            setLoading(false); console.error("Error:", error);
+        }
     };
 
     useEffect(() => {
-        if (user.email.length > 0 && user.password.length > 0 && user.name.length > 0) {
-            setButtonDisabled(false);
-        } else {
-            setButtonDisabled(true);
-        }
+        const { name, email, password } = user;
+        setButtonDisabled(!(name && email && password));
     }, [user]);
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8  ">
-            <p className="text-center text-4xl font-bold  mb-8">My <span className="rounded-lg bg-orange-500 p-2 text-black">Next.js</span></p>
 
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen p-8">
+            <p className="text-center text-4xl font-bold mb-8">
+                My <span className="rounded-lg bg-orange-500 p-2 text-black">Next.js</span>
+            </p>
             <div className="w-full max-w-md p-6 bg-gray-900 rounded-lg shadow-lg">
-                <form className="flex flex-col space-y-4">
+                <form className="flex flex-col space-y-4" onSubmit={signup}>
                     <label htmlFor="name" className="text-gray-200 font-medium">
                         Name
                     </label>
@@ -41,7 +43,6 @@ export default function Page() {
                         className="p-3 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         type="text"
                         id="name"
-                        name="name"
                         placeholder="Name"
                         value={user.name}
                         onChange={(e) => setUser({ ...user, name: e.target.value })}
@@ -53,9 +54,8 @@ export default function Page() {
                     <input
                         className="p-3 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         type="email"
-                        placeholder="Email"
                         id="email"
-                        name="email"
+                        placeholder="Email"
                         value={user.email}
                         onChange={(e) => setUser({ ...user, email: e.target.value })}
                     />
@@ -66,9 +66,8 @@ export default function Page() {
                     <input
                         className="p-3 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         type="password"
-                        placeholder="Password"
                         id="password"
-                        name="password"
+                        placeholder="Password"
                         value={user.password}
                         onChange={(e) => setUser({ ...user, password: e.target.value })}
                     />
@@ -76,11 +75,16 @@ export default function Page() {
                     <button
                         onClick={signup}
                         type="button"
-                        className="mt-6 p-3 text-white rounded-lg hover:bg-gray-800 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        className={`mt-6 p-3 text-white rounded-lg ${(buttonDisabled || loading) ? "bg-gray-500 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-800"
+                            }`}
+                        disabled={buttonDisabled || loading}
                     >
-                        `{buttonDisabled ? "Loading..." : "Signup"}
+                        {(loading) ? "Signing up..." : "Signup"}
                     </button>
-                    <Link href="/login">Already have an account? Login</Link>
+
+                    <Link href="/login" className="text-blue-500 hover:underline">
+                        Already have an account? Login
+                    </Link>
                 </form>
             </div>
         </div>
