@@ -1,18 +1,34 @@
 "use client"
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function Page() {
+    const router = useRouter();
     const [user, setUser] = React.useState({
         email: "",
         password: "",
     });
 
-    const login = async () => {
-        // Signup functionality will go here
-    };
+    const [loading, setLoading] = useState(false);
+    const [buttonDisabled, setButtonDisabled] = useState(true);
 
+    const login = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.post("/api/user/login", user);
+            console.log(response);
+            router.push("/home");
+        } catch (error) {
+            console.error("Error:", error);
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        const { email, password } = user;
+        setButtonDisabled(!(email && password));
+    }, [user])
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-8  ">
             <p className="text-center text-4xl font-bold  mb-8">My <span className="rounded-lg bg-orange-500 p-2 text-black">Next.js</span></p>
@@ -50,9 +66,11 @@ export default function Page() {
                     <button
                         onClick={login}
                         type="button"
-                        className="mt-6 p-3 text-white rounded-lg hover:bg-gray-800 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        className={`mt-6 p-3 text-white rounded-lg ${(buttonDisabled || loading) ? "bg-gray-500 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-800"
+                            }`}
+                        disabled={buttonDisabled || loading}
                     >
-                        Login
+                        {loading ? "Loading..." : "Login"}
                     </button>
                     <Link href="/signup">Create an account</Link>
                 </form>
